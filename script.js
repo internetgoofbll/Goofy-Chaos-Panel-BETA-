@@ -1,6 +1,5 @@
 //THIS ALL GOES IN DEV CONSOLE/INSPECT!!!
 
-
 (function launchGoofyControlPanel() {
   const existingMenu = document.getElementById('dev-debug-menu-root');
   if (existingMenu) existingMenu.remove();
@@ -166,9 +165,17 @@
     return btn;
   }
 
-  // --- CATEGORY 1: DISGUISE & UTILITIES ---
-  const catStealth = createCategory('1. Stealth & Disguise');
+  // --- CATEGORY 1: DOM EDITING & STEALTH ---
+  const catStealth = createCategory('1. Live Editing & Stealth');
   let calcOverlay = null;
+
+  // NEW FEATURE: Live Text Editing Toggle
+  let liveEditEnabled = false;
+  catStealth.body.appendChild(createButton('✏️ Toggle Live Text Editing', () => {
+    liveEditEnabled = !liveEditEnabled;
+    document.designMode = liveEditEnabled ? 'on' : 'off';
+    alert(`Live Text Editing is now ${liveEditEnabled ? 'ON (click any text on page to edit)' : 'OFF'}.`);
+  }));
 
   catStealth.body.appendChild(createButton('🏫 Enable School Mode (Fake Calc)', () => {
     menuRoot.style.display = 'none';
@@ -256,18 +263,18 @@
     document.body.appendChild(calcOverlay);
   }));
 
-  catStealth.body.appendChild(createButton('🗣️️ Speak Custom Text (TTS)', () => {
+  catStealth.body.appendChild(createButton('🗣 Speak Custom Text (TTS)', () => {
     const text = prompt('Enter text to speak out loud:', 'System override engaged.');
     if (text) speakText(text);
   }));
 
   menuRoot.appendChild(catStealth.container);
 
-  // --- CATEGORY 2: VISUAL OVERLAYS ---
-  const catVisuals = createCategory('2. Visual Effects');
+  // --- CATEGORY 2: VISUAL OVERLAYS & FILTERS ---
+  const catVisuals = createCategory('2. Visual Overlays & Filters');
 
   catVisuals.body.appendChild(createButton('💥 LAUNCH NUKE EXPLOSION', () => {
-    playExplosionSound(); // TTS removed
+    playExplosionSound();
 
     const flash = document.createElement('div');
     Object.assign(flash.style, {
@@ -349,12 +356,50 @@
     matrixInterval = setInterval(drawMatrix, 33);
   }));
 
+  // NEW FEATURE: Invert Colors
+  let colorsInverted = false;
+  catVisuals.body.appendChild(createButton('🌓 Toggle Invert Colors', () => {
+    colorsInverted = !colorsInverted;
+    document.documentElement.style.filter = colorsInverted ? 'invert(1) hue-rotate(180deg)' : '';
+  }));
+
+  // NEW FEATURE: Party Disco Flash
+  let partyInterval = null;
+  catVisuals.body.appendChild(createButton('🪩 Toggle Party Disco Flash', () => {
+    if (partyInterval) {
+      clearInterval(partyInterval);
+      partyInterval = null;
+      document.body.style.backgroundColor = '';
+      return;
+    }
+    partyInterval = setInterval(() => {
+      document.body.style.backgroundColor = `#${Math.floor(Math.random()*16777215).toString(16)}`;
+    }, 100);
+  }));
+
+  // NEW FEATURE: Screen Redacted Mode
+  let redactedMode = false;
+  catVisuals.body.appendChild(createButton('⬛ Toggle Redacted / Censored Mode', () => {
+    redactedMode = !redactedMode;
+    const styleId = 'redacted-style-override';
+    let styleEl = document.getElementById(styleId);
+    if (redactedMode) {
+      if (!styleEl) {
+        styleEl = document.createElement('style');
+        styleEl.id = styleId;
+        styleEl.textContent = 'p, h1, h2, h3, h4, span, a, li { background-color: #000 !important; color: #000 !important; }';
+        document.head.appendChild(styleEl);
+      }
+    } else if (styleEl) {
+      styleEl.remove();
+    }
+  }));
+
   menuRoot.appendChild(catVisuals.container);
 
-  // --- CATEGORY 3: MORE GOOFY CHAOS ---
+  // --- CATEGORY 3: ULTRA GOOFY CHAOS ---
   const catGoofy = createCategory('3. Ultra Goofy Chaos');
 
-  // 1. Gravity Collapse
   catGoofy.body.appendChild(createButton('🌐 Page Gravity Collapse', () => {
     const elements = Array.from(document.body.querySelectorAll('*')).filter(el => el !== menuRoot && !menuRoot.contains(el));
     elements.forEach(el => {
@@ -365,7 +410,6 @@
     });
   }));
 
-  // 2. Googly Eyes Cursor Follower
   let eyesContainer = null;
   let eyeMoveHandler = null;
   catGoofy.body.appendChild(createButton('👀 Toggle Googly Eyes', () => {
@@ -427,9 +471,7 @@
     document.addEventListener('mousemove', eyeMoveHandler);
   }));
 
-  // 3. Bouncing DVD Logo Mode
   let dvdInterval = null;
-  let dvdBox = null;
   catGoofy.body.appendChild(createButton('📀 Bouncing DVD Panel Mode', () => {
     if (dvdInterval) {
       clearInterval(dvdInterval);
@@ -465,17 +507,136 @@
     }, 16);
   }));
 
-  // 4. Comic Sans Page Takeover
   catGoofy.body.appendChild(createButton('✏️ Force Comic Sans Everywhere', () => {
     const style = document.createElement('style');
     style.textContent = '* { font-family: "Comic Sans MS", "Comic Sans", cursive !important; }';
     document.head.appendChild(style);
   }));
 
+  // NEW FEATURE: Upside Down Page
+  let pageFlipped = false;
+  catGoofy.body.appendChild(createButton('🙃 Toggle Upside Down Page', () => {
+    pageFlipped = !pageFlipped;
+    document.body.style.transform = pageFlipped ? 'rotate(180deg)' : '';
+    document.body.style.transition = 'transform 0.5s ease';
+  }));
+
+  // NEW FEATURE: Spinning Elements Hazard
+  let spinningActive = false;
+  catGoofy.body.appendChild(createButton('🌀 Toggle Spinning Elements', () => {
+    spinningActive = !spinningActive;
+    const styleId = 'spin-hazard-style';
+    let styleEl = document.getElementById(styleId);
+    if (spinningActive) {
+      if (!styleEl) {
+        styleEl = document.createElement('style');
+        styleEl.id = styleId;
+        styleEl.textContent = `
+          @keyframes spinEverything { 100% { transform: rotate(360deg); } }
+          img, button, p, h1, h2 { animation: spinEverything 2s linear infinite !important; }
+        `;
+        document.head.appendChild(styleEl);
+      }
+    } else if (styleEl) {
+      styleEl.remove();
+    }
+  }));
+
+  // NEW FEATURE: Earthquake Shake
+  let quaking = false;
+  catGoofy.body.appendChild(createButton('🫨 Toggle Earthquake Shake', () => {
+    quaking = !quaking;
+    const styleId = 'earthquake-style';
+    let styleEl = document.getElementById(styleId);
+    if (quaking) {
+      if (!styleEl) {
+        styleEl = document.createElement('style');
+        styleEl.id = styleId;
+        styleEl.textContent = `
+          @keyframes earthQuake {
+            0% { transform: translate(3px, 3px) rotate(0deg); }
+            20% { transform: translate(-3px, -3px) rotate(-1deg); }
+            40% { transform: translate(-3px, 3px) rotate(1deg); }
+            60% { transform: translate(3px, 1px) rotate(0deg); }
+            80% { transform: translate(1px, -3px) rotate(1deg); }
+            100% { transform: translate(-2px, 2px) rotate(-1deg); }
+          }
+          body { animation: earthQuake 0.15s infinite !important; }
+        `;
+        document.head.appendChild(styleEl);
+      }
+    } else if (styleEl) {
+      styleEl.remove();
+    }
+  }));
+
+  // NEW FEATURE: Emoji Cursor Trails
+  let trailHandler = null;
+  catGoofy.body.appendChild(createButton('✨ Toggle Emoji Cursor Trail', () => {
+    if (trailHandler) {
+      document.removeEventListener('mousemove', trailHandler);
+      trailHandler = null;
+      return;
+    }
+    const emojis = ['✨', '🔥', '🤡', '🍕', '🎉', '💀'];
+    trailHandler = (e) => {
+      const spark = document.createElement('span');
+      spark.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      Object.assign(spark.style, {
+        position: 'fixed',
+        left: `${e.clientX}px`,
+        top: `${e.clientY}px`,
+        pointerEvents: 'none',
+        zIndex: '2147483646',
+        fontSize: '16px',
+        transition: 'all 1s linear'
+      });
+      document.body.appendChild(spark);
+      setTimeout(() => {
+        spark.style.opacity = '0';
+        spark.style.transform = 'translateY(-30px)';
+      }, 20);
+      setTimeout(() => spark.remove(), 1000);
+    };
+    document.addEventListener('mousemove', trailHandler);
+  }));
+
+  // NEW FEATURE: Swap All Images to Cats
+  catGoofy.body.appendChild(createButton('🐱 Swap Images to Cats', () => {
+    document.querySelectorAll('img').forEach(img => {
+      img.src = `https://cataas.com/cat?${Math.random()}`;
+    });
+  }));
+
+  // NEW FEATURE: Confetti Cannon
+  catGoofy.body.appendChild(createButton('🎊 Fire Confetti Cannon', () => {
+    for (let i = 0; i < 50; i++) {
+      const piece = document.createElement('div');
+      Object.assign(piece.style, {
+        position: 'fixed',
+        left: `${Math.random() * 100}vw`,
+        top: '-10px',
+        width: '10px',
+        height: '10px',
+        backgroundColor: `#${Math.floor(Math.random()*16777215).toString(16)}`,
+        zIndex: '2147483646',
+        pointerEvents: 'none',
+        transition: `all ${2 + Math.random() * 2}s ease-out`
+      });
+      document.body.appendChild(piece);
+      setTimeout(() => {
+        piece.style.top = '100vh';
+        piece.style.transform = `rotate(${Math.random() * 720}deg)`;
+        piece.style.opacity = '0';
+      }, 20);
+      setTimeout(() => piece.remove(), 4000);
+    }
+  }));
+
   menuRoot.appendChild(catGoofy.container);
 
   // --- CATEGORY 4: SCREEN DRAWING ---
-  const catDraw = createCategory('4. Screen Drawing');
+  const catDraw = createCategory('4. Screen Canvas & Drawing');
   let drawCanvas = null;
   let isDrawing = false;
   let drawCtx = null;
